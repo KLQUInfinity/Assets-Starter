@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEditor;
 
-public class Creator : MonoBehaviour
+public class Creator : Editor
 {
     private static string[] folderNames = { "_AppAssets", "_Scenes", "Scripts", "Prefabs", "Sprites", "Materials", "Sounds", "Animations" };
 
