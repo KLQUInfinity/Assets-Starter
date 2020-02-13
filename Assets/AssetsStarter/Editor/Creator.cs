@@ -35,9 +35,7 @@ namespace KLQU_AssetsStarter
                 folders[i] = GUILayout.Toggle(folders[i], folderNames[i]);
                 if (folders[i])
                 {
-                    //EditorGUILayout.BeginVertical();
                     folderNames[i] = GUILayout.TextField(folderNames[i]);
-                    //EditorGUILayout.EndVertical();
                 }
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.EndVertical();
@@ -88,10 +86,9 @@ namespace KLQU_AssetsStarter
                         EditorUtility.DisplayDialog("Error Deleting Folder", "\"" + folderName + "\" wasn't found in the folder list\nPlease Pick another Name", "OK");
                     }
                 }
+                GUILayout.FlexibleSpace();
+                EditorGUILayout.EndHorizontal();
             }
-
-            GUILayout.FlexibleSpace();
-            EditorGUILayout.EndHorizontal();
             #endregion
 
             EditorGUILayout.EndVertical();
