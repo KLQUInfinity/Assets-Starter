@@ -24,7 +24,7 @@ namespace KLQU_AssetsStarter
         private void OnGUI()
         {
             scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
-            EditorGUILayout.Space(5);
+            GUILayout.Space(5);
             EditorGUILayout.BeginVertical();
 
             #region Display Folders 
@@ -50,7 +50,7 @@ namespace KLQU_AssetsStarter
                 CreateAssets();
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
-            EditorGUILayout.Space(10);
+            GUILayout.Space(10);
             #endregion
 
             #region Foldout Add and Delete
@@ -59,7 +59,7 @@ namespace KLQU_AssetsStarter
             {
                 folderName = EditorGUILayout.TextField("FolderName :", folderName);
 
-                EditorGUILayout.Space(10);
+                GUILayout.Space(10);
                 EditorGUILayout.BeginHorizontal();
                 GUILayout.FlexibleSpace();
                 if (GUILayout.Button("Add", GUILayout.Height(40), GUILayout.Width(110)))
