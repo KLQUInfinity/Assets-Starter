@@ -7,12 +7,15 @@ namespace KLQU_AssetsStarter
 {
     public class Creator : EditorWindow
     {
-        private static List<string> folderNames = new List<string> { "_AppAssets", "_Scenes", "Scripts", "Prefabs", "Sprites", "Materials", "Sounds", "Animations" };
+        private static List<string> folderNames = new List<string> { "_Scenes", "Scripts", "Prefabs", "Sprites", "Materials", "Sounds", "Animations" };
 
+        private static string baseFolderName = "_AppAssets";
         private Vector2 scrollPos;
-        private static List<bool> folders = new List<bool> { true, false, false, false, false, false, false, false };
+        private static List<bool> folders = new List<bool> { false, false, false, false, false, false, false };
+        private static bool usingGithub = true;
         private string folderName = "";
         private bool delete_AddFold = false;
+        private static Object dummyAsset;
 
 
         [MenuItem("Tools/Assets Starter/CreationWindow", false, 0)]
@@ -23,12 +26,14 @@ namespace KLQU_AssetsStarter
 
         private void OnGUI()
         {
-            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+            //scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
             GUILayout.Space(5);
+            Seprator(90);
             EditorGUILayout.BeginVertical();
 
             #region Display Folders 
-            for (int i = 1; i < folderNames.Count; i++)
+            GUILayout.Space(5);
+            for (int i = 0; i < folderNames.Count; i++)
             {
                 EditorGUILayout.BeginVertical();
                 EditorGUILayout.BeginHorizontal();
@@ -40,10 +45,18 @@ namespace KLQU_AssetsStarter
                 EditorGUILayout.EndHorizontal();
                 EditorGUILayout.EndVertical();
             }
+            GUILayout.Space(5);
+            #endregion
+
+            #region Other Options
+            Seprator(position.width);
+            GUILayout.Space(5);
+            usingGithub = GUILayout.Toggle(usingGithub, "Using GitHub");
+            GUILayout.Space(5);
             #endregion
 
             #region Create Folders Button
-            Seprator(3);
+            Seprator(90);
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
             if (GUILayout.Button("CreateFolders", GUILayout.Height(40), GUILayout.Width(110)))
@@ -92,16 +105,15 @@ namespace KLQU_AssetsStarter
             #endregion
 
             EditorGUILayout.EndVertical();
-            EditorGUILayout.EndScrollView();
+            //EditorGUILayout.EndScrollView();
         }
 
-
-        private void Seprator(int height)
+        private void Seprator(float width)
         {
             GUILayout.Space(3);
             EditorGUILayout.BeginHorizontal();
             GUILayout.FlexibleSpace();
-            GUILayout.Box("", GUILayout.Height(height), GUILayout.Width(90));
+            GUILayout.Box("", GUILayout.Height(3), GUILayout.Width(width));
             GUILayout.FlexibleSpace();
             EditorGUILayout.EndHorizontal();
             GUILayout.Space(3);
@@ -110,25 +122,39 @@ namespace KLQU_AssetsStarter
         private static void CreateAssets()
         {
             // Create the MainFolder
-            if (!AssetDatabase.IsValidFolder("Assets/" + folderNames[0]))
+            if (!AssetDatabase.IsValidFolder("Assets/" + baseFolderName))
             {
-                AssetDatabase.CreateFolder("Assets", folderNames[0]);
+                AssetDatabase.CreateFolder("Assets", baseFolderName);
+            }
+
+            if (usingGithub)
+            {
+                dummyAsset = AssetDatabase.LoadAssetAtPath("Assets/AssetsStarter/Editor/DummyAsset.png", typeof(Object));
             }
 
             // Create SubFolder
-            for (int i = 1; i < folderNames.Count; i++)
+            for (int i = 0; i < folderNames.Count; i++)
             {
                 if (folders[i])
                 {
-                    if (!AssetDatabase.IsValidFolder("Assets/" + folderNames[0] + "/" + folderNames[i]))
+                    if (!AssetDatabase.IsValidFolder("Assets/" + baseFolderName + "/" + folderNames[i]))
                     {
                         if (folderNames[i].Equals("_Scenes") && AssetDatabase.IsValidFolder("Assets/Scenes"))
                         {
-                            AssetDatabase.MoveAsset("Assets/Scenes", "Assets/" + folderNames[0] + "/" + folderNames[i]);
+                            AssetDatabase.MoveAsset("Assets/Scenes", "Assets/" + baseFolderName + "/" + folderNames[i]);
                         }
                         else
                         {
-                            AssetDatabase.CreateFolder("Assets/" + folderNames[0], folderNames[i]);
+                            AssetDatabase.CreateFolder("Assets/" + baseFolderName, folderNames[i]);
+
+                            if (usingGithub)
+                            {
+                                if (dummyAsset)
+                                {
+                                    AssetDatabase.CopyAsset("Assets/AssetsStarter/Editor/DummyAsset.png", "Assets/" + baseFolderName + "/" + folderNames[i] + "/DummyAsset.png");
+                                }
+
+                            }
                         }
                     }
                 }
