@@ -7,44 +7,72 @@ namespace KLQU_AssetsStarter
 {
     public class Creator : EditorWindow
     {
-        private static List<string> folderNames = new List<string> { "_Scenes", "Scripts", "Prefabs", "Sprites", "Materials", "Sounds", "Animations" };
+        [SerializeField]
+        private List<KLQU_Folder> folders = new List<KLQU_Folder>()
+        {
+            new KLQU_Folder("_Scenes"),
+            new KLQU_Folder("Scripts"),
+            new KLQU_Folder("Prefabs"),
+            new KLQU_Folder("Sprites"),
+            new KLQU_Folder("Materials"),
+            new KLQU_Folder("Sounds"),
+            new KLQU_Folder("Animations")
+        };
 
-        private static string baseFolderName = "_AppAssets";
-        private Vector2 scrollPos;
-        private static List<bool> folders = new List<bool> { false, false, false, false, false, false, false };
+        [SerializeField] private string baseFolderName = "_AppAssets";
+
+        private SerializedObject so;
+
+        private SerializedProperty foldersProperty;
+        private SerializedProperty baseFolderNameProperty;
+
+        private Vector2 scrollPos = Vector2.zero;
         private static bool usingGithub = true;
-        private string folderName = "";
-        private bool delete_AddFold = false;
         private static Object dummyAsset;
 
 
         [MenuItem("Tools/Assets Starter/CreationWindow", false, 0)]
         private static void InitWindowToMakeStarter()
         {
-            GetWindowWithRect(typeof(Creator), new Rect(0, 0, 120, 235));
+            Creator window = (Creator)EditorWindow.GetWindow(typeof(Creator));
+            window.titleContent.text = "Folders Creator";
+            window.minSize = new Vector2(400, 400);
+            window.Init();
+            window.Show();
+        }
+
+        public void Init()
+        {
+            ScriptableObject target = this;
+            so = new SerializedObject(target);
+            foldersProperty = so.FindProperty("folders");
+            baseFolderNameProperty = so.FindProperty("baseFolderName");
         }
 
         private void OnGUI()
         {
-            //scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+            scrollPos = EditorGUILayout.BeginScrollView(scrollPos);
+
             GUILayout.Space(5);
             Seprator(90);
             EditorGUILayout.BeginVertical();
+            GUILayout.Space(5);
+
+
+            #region Display Main folderName
+            EditorGUILayout.PropertyField(
+                baseFolderNameProperty,
+                new GUIContent("BaseFolderName", "This for creating dummy asset inside end level folder to store folder on Github")
+                );
+            #endregion
 
             #region Display Folders 
             GUILayout.Space(5);
-            for (int i = 0; i < folderNames.Count; i++)
-            {
-                EditorGUILayout.BeginVertical();
-                EditorGUILayout.BeginHorizontal();
-                folders[i] = GUILayout.Toggle(folders[i], folderNames[i]);
-                if (folders[i])
-                {
-                    folderNames[i] = GUILayout.TextField(folderNames[i]);
-                }
-                EditorGUILayout.EndHorizontal();
-                EditorGUILayout.EndVertical();
-            }
+            EditorGUILayout.BeginHorizontal();
+
+            EditorGUILayout.PropertyField(foldersProperty, true);
+
+            EditorGUILayout.EndHorizontal();
             GUILayout.Space(5);
             #endregion
 
@@ -66,46 +94,9 @@ namespace KLQU_AssetsStarter
             GUILayout.Space(10);
             #endregion
 
-            #region Foldout Add and Delete
-            delete_AddFold = EditorGUILayout.Foldout(delete_AddFold, "Add & Delete Folders");
-            if (delete_AddFold)
-            {
-                folderName = EditorGUILayout.TextField("FolderName :", folderName);
-
-                GUILayout.Space(10);
-                EditorGUILayout.BeginHorizontal();
-                GUILayout.FlexibleSpace();
-                if (GUILayout.Button("Add", GUILayout.Height(40), GUILayout.Width(110)))
-                {
-                    if (!folderNames.Contains(folderName))
-                    {
-                        folderNames.Add(folderName);
-                        folders.Add(true);
-                    }
-                    else
-                    {
-                        EditorUtility.DisplayDialog("Error Adding new Folder", "\"" + folderName + "\" was found in the folder list\nPlease Pick another Name", "OK");
-                    }
-                }
-                if (GUILayout.Button("Delete", GUILayout.Height(40), GUILayout.Width(110)))
-                {
-                    if (folderNames.Contains(folderName))
-                    {
-                        folders.RemoveAt(folderNames.IndexOf(folderName));
-                        folderNames.Remove(folderName);
-                    }
-                    else
-                    {
-                        EditorUtility.DisplayDialog("Error Deleting Folder", "\"" + folderName + "\" wasn't found in the folder list\nPlease Pick another Name", "OK");
-                    }
-                }
-                GUILayout.FlexibleSpace();
-                EditorGUILayout.EndHorizontal();
-            }
-            #endregion
-
             EditorGUILayout.EndVertical();
-            //EditorGUILayout.EndScrollView();
+            so.ApplyModifiedProperties();
+            EditorGUILayout.EndScrollView();
         }
 
         private void Seprator(float width)
@@ -119,7 +110,7 @@ namespace KLQU_AssetsStarter
             GUILayout.Space(3);
         }
 
-        private static void CreateAssets()
+        private void CreateAssets()
         {
             // Create the MainFolder
             if (!AssetDatabase.IsValidFolder("Assets/" + baseFolderName))
@@ -133,34 +124,45 @@ namespace KLQU_AssetsStarter
             }
 
             // Create SubFolder
-            for (int i = 0; i < folderNames.Count; i++)
-            {
-                if (folders[i])
-                {
-                    if (!AssetDatabase.IsValidFolder("Assets/" + baseFolderName + "/" + folderNames[i]))
-                    {
-                        if (folderNames[i].Equals("_Scenes") && AssetDatabase.IsValidFolder("Assets/Scenes"))
-                        {
-                            AssetDatabase.MoveAsset("Assets/Scenes", "Assets/" + baseFolderName + "/" + folderNames[i]);
-                        }
-                        else
-                        {
-                            AssetDatabase.CreateFolder("Assets/" + baseFolderName, folderNames[i]);
-
-                            if (usingGithub)
-                            {
-                                if (dummyAsset)
-                                {
-                                    AssetDatabase.CopyAsset("Assets/AssetsStarter/Editor/DummyAsset.png", "Assets/" + baseFolderName + "/" + folderNames[i] + "/DummyAsset.png");
-                                }
-
-                            }
-                        }
-                    }
-                }
-            }
+            CreateFolders("Assets/" + baseFolderNameProperty.stringValue, folders);
 
             AssetDatabase.Refresh();
+        }
+
+        private void CreateFolders(string path, List<KLQU_Folder> folders)
+        {
+            if (folders == null || folders.Count == 0)
+            {
+                if (!path.Equals(this.baseFolderName))
+                {
+                    if (usingGithub && dummyAsset)
+                    {
+                        AssetDatabase.CopyAsset("Assets/AssetsStarter/Editor/DummyAsset.png", path + "/DummyAsset.png");
+                    }
+                }
+                return;
+            }
+
+            for (int i = 0; i < folders.Count; i++)
+            {
+                if (!AssetDatabase.IsValidFolder(path + "/" + folders[i].name))
+                {
+                    AssetDatabase.CreateFolder(path, folders[i].name);
+                }
+                CreateFolders(path + "/" + folders[i].name, folders[i].insideFolders);
+            }
+        }
+    }
+
+    [System.Serializable]
+    public class KLQU_Folder
+    {
+        public string name;
+        public List<KLQU_Folder> insideFolders;
+
+        public KLQU_Folder(string name)
+        {
+            this.name = name;
         }
     }
 }
