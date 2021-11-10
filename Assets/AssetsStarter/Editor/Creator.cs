@@ -62,7 +62,7 @@ namespace KLQU_AssetsStarter
             #region Display Main folderName
             EditorGUILayout.PropertyField(
                 baseFolderNameProperty,
-                new GUIContent("BaseFolderName", "This for creating dummy asset inside end level folder to store folder on Github")
+                new GUIContent("BaseFolderName", "This will be the root folder that all folders created will nested from it ")
                 );
             #endregion
 
@@ -79,7 +79,7 @@ namespace KLQU_AssetsStarter
             #region Other Options
             Seprator(position.width);
             GUILayout.Space(5);
-            usingGithub = GUILayout.Toggle(usingGithub, "Using GitHub");
+            usingGithub = GUILayout.Toggle(usingGithub, new GUIContent("Using GitHub", "This for creating dummy asset inside end level folder to store folder on Github"));
             GUILayout.Space(5);
             #endregion
 
@@ -112,6 +112,12 @@ namespace KLQU_AssetsStarter
 
         private void CreateAssets()
         {
+            if (string.IsNullOrEmpty(baseFolderName))
+            {
+                Debug.LogError($"you have BaseFolderName enmpty it must have name");
+                return;
+            }
+
             // Create the MainFolder
             if (!AssetDatabase.IsValidFolder("Assets/" + baseFolderName))
             {
@@ -145,11 +151,18 @@ namespace KLQU_AssetsStarter
 
             for (int i = 0; i < folders.Count; i++)
             {
-                if (!AssetDatabase.IsValidFolder(path + "/" + folders[i].name))
+                if (string.IsNullOrEmpty(folders[i].name))
                 {
-                    AssetDatabase.CreateFolder(path, folders[i].name);
+                    Debug.LogError($"you have enmpty name folder in path:({path},element:{i + 1}) the folder must have name");
                 }
-                CreateFolders(path + "/" + folders[i].name, folders[i].insideFolders);
+                else
+                {
+                    if (!AssetDatabase.IsValidFolder(path + "/" + folders[i].name))
+                    {
+                        AssetDatabase.CreateFolder(path, folders[i].name);
+                    }
+                    CreateFolders(path + "/" + folders[i].name, folders[i].insideFolders);
+                }
             }
         }
     }
