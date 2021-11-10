@@ -114,7 +114,7 @@ namespace KLQU_AssetsStarter
         {
             if (string.IsNullOrEmpty(baseFolderName))
             {
-                Debug.LogError($"you have BaseFolderName enmpty it must have name");
+                Debug.LogError("you have BaseFolderName enmpty it must have name");
                 return;
             }
 
@@ -153,7 +153,7 @@ namespace KLQU_AssetsStarter
             {
                 if (string.IsNullOrEmpty(folders[i].name))
                 {
-                    Debug.LogError($"you have enmpty name folder in path:({path},element:{i + 1}) the folder must have name");
+                    Debug.LogError("you have enmpty name folder in path:(" + path + ",element:" + i + ") the folder must have name");
                 }
                 else
                 {
